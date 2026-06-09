@@ -1,5 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.CAMERA"/>
 
@@ -7,11 +6,9 @@
         android:label="QR Check Tool"
         android:theme="@android:style/Theme.Light.NoTitleBar">
 
-        <!-- ✅ 关键：加 tools:replace -->
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
-            android:screenOrientation="portrait"
-            tools:replace="android:screenOrientation"/>
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".MainActivity"
