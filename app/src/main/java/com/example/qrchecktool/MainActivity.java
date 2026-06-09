@@ -104,33 +104,33 @@ public class MainActivity extends Activity {
                 "1", "必须为0", idOK,
                 idOK ? "" : "必须为0"));
 
-        sb.append("------\n");
+        sb.append("------------------------------------\n");
         sb.append(buildBlock("SKU Number", sku,
                 String.valueOf(sku.length()),
                 "9位数字", skuOK,
                 skuOK ? "" : "必须9位数字"));
 
-        sb.append("------\n");
+        sb.append("------------------------------------\n");
         sb.append(buildBlock("Batch Number", batch,
                 String.valueOf(batch.length()),
                 "≤15位字母数字", batchOK,
                 batchOK ? "" : "非法"));
 
-        sb.append("------\n");
+        sb.append("------------------------------------\n");
         sb.append(buildBlock("Production Date", pdStr,
                 String.valueOf(pdStr.length()),
                 "YYYYMMDD 且 ≤ Today", pdOK,
                 pd == null ? "非法日期" :
                 pd.after(today) ? "大于今天" : ""));
 
-        sb.append("------\n");
+        sb.append("------------------------------------\n");
         sb.append(buildBlock("Due Date", ddStr,
                 String.valueOf(ddStr.length()),
                 "YYYYMMDD 且 > Today", ddOK,
                 dd == null ? "非法日期" :
                 !dd.after(today) ? "必须大于今天" : ""));
 
-        sb.append("------\n");
+        sb.append("------------------------------------\n");
         sb.append(buildBlock("Date Relation","",
                 "-","Production < Due",
                 relationOK,
