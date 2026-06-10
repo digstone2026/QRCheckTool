@@ -264,7 +264,7 @@ public class MainActivity extends Activity {
     private String extract(String input){
         if(input.contains("cii1/")){
             String raw=input.substring(input.indexOf("cii1/")+5);
-            return raw.replace("&","#").trim();
+            return raw.replace("&","#");   // ✅ 不要 trim
         }
         return input.replace("&","#").trim();
     }
