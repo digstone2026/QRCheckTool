@@ -71,7 +71,7 @@ public class MainActivity extends Activity {
 
         tvStatus = new TextView(this);
         tvStatus.setText("READY");
-        tvStatus.setTextSize(40);
+        tvStatus.setTextSize(34);
         tvStatus.setGravity(Gravity.CENTER);
         tvStatus.setTextColor(Color.WHITE);
 
@@ -82,7 +82,7 @@ public class MainActivity extends Activity {
 
         LinearLayout topBox = new LinearLayout(this);
         topBox.setOrientation(LinearLayout.VERTICAL);
-        topBox.setPadding(20,40,20,40);
+        topBox.setPadding(20,10,20,10);
         topBox.setBackgroundColor(Color.GRAY);
         topBox.addView(tvStatus);
         topBox.addView(tvInfo);
