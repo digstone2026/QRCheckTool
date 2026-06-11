@@ -4,10 +4,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
 import android.graphics.Color;
-import android.media.AudioManager;
-import android.media.ToneGenerator;
+import android.media.*;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.widget.*;
 
 import java.text.SimpleDateFormat;
@@ -15,9 +15,11 @@ import java.util.Date;
 
 public class MainActivity extends Activity {
 
+    EditText etInput;
     TextView tvStatus, tvVersion, tvExtracted;
     LinearLayout container;
 
+    // ✅ 自动识别扫码广播数据
     private String getScanData(Intent intent){
         String[] keys = {"barcode_string","data","barcode_data","scan_data"};
         for(String key : keys){
@@ -29,11 +31,14 @@ public class MainActivity extends Activity {
         return "";
     }
 
+    // ✅ 广播接收（DT50U）
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String data = getScanData(intent);
+
             if(data != null && !data.isEmpty()){
+                etInput.setText(data);   // ✅ 显示到输入框
                 process(data);
             }
         }
@@ -47,6 +52,7 @@ public class MainActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
 
+        // ✅ 顶部状态
         tvStatus = new TextView(this);
         tvStatus.setText("READY");
         tvStatus.setTextSize(40);
@@ -55,8 +61,8 @@ public class MainActivity extends Activity {
 
         tvVersion = new TextView(this);
         tvVersion.setText("v1.0 | 20260610 | jazhao");
-        tvVersion.setGravity(Gravity.CENTER);
         tvVersion.setTextColor(Color.WHITE);
+        tvVersion.setGravity(Gravity.CENTER);
 
         LinearLayout statusBox = new LinearLayout(this);
         statusBox.setOrientation(LinearLayout.VERTICAL);
@@ -75,12 +81,28 @@ public class MainActivity extends Activity {
         topBar.addView(statusBox,new LinearLayout.LayoutParams(0,-2,1));
         topBar.addView(btnClose);
 
+        // ✅ 输入框（恢复 ✅）
+        etInput = new EditText(this);
+        etInput.setHint("Scan or Manual Input");
+
+        // ✅ 手动输入回车触发
+        etInput.setOnKeyListener((v, keyCode, event) -> {
+            if(keyCode == KeyEvent.KEYCODE_ENTER &&
+               event.getAction() == KeyEvent.ACTION_DOWN){
+
+                process(etInput.getText().toString());
+                return true;
+            }
+            return false;
+        });
+
         tvExtracted = new TextView(this);
 
         container = new LinearLayout(this);
         container.setOrientation(LinearLayout.VERTICAL);
 
         root.addView(topBar);
+        root.addView(etInput);          // ✅ 加回输入框
         root.addView(tvExtracted);
         root.addView(container);
 
@@ -88,12 +110,15 @@ public class MainActivity extends Activity {
         setContentView(scroll);
     }
 
+    // ✅ 注册广播
     @Override
     protected void onResume() {
         super.onResume();
+
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.intent.ACTION_DECODE_DATA");
         filter.addAction("com.android.server.scannerservice.broadcast");
+
         registerReceiver(receiver, filter);
     }
 
@@ -103,9 +128,15 @@ public class MainActivity extends Activity {
         unregisterReceiver(receiver);
     }
 
+    // ✅ 核心逻辑（完整）
     private void process(String input){
 
         container.removeAllViews();
+
+        if(input == null || input.isEmpty()){
+            setStatus(false);
+            return;
+        }
 
         String extracted = extract(input);
         tvExtracted.setText("Extracted:\n" + extracted);
@@ -131,31 +162,29 @@ public class MainActivity extends Activity {
         Date today = new Date();
 
         boolean idOK = id.equals("0");
-        String idErr = idOK ? "" : "Must be 0";
-
         boolean skuOK = sku.matches("\\d{9}");
-        String skuErr = skuOK ? "" : "Must be 9 digits";
-
         boolean batchOK = batch.matches("[A-Za-z0-9]{1,15}");
-        String batchErr = batchOK ? "" : "Invalid";
 
+        // ✅ Production Date
         boolean pdOK = false;
         String pdErr = "";
         Date pd = null;
 
         if(!pdStr.matches("^\\d{8}$")){
             pdErr = "Must be 8 digits";
-        } else {
+        }else{
             pd = strictDate(pdStr);
+
             if(pd == null){
                 pdErr = "Invalid date";
-            } else if(pd.after(today)){
+            }else if(pd.after(today)){
                 pdErr = "Future not allowed";
-            } else {
+            }else{
                 pdOK = true;
             }
         }
 
+        // ✅ Due Date（最终版）
         Date dd = null;
         boolean ddOK = true;
         StringBuilder ddErr = new StringBuilder();
@@ -163,18 +192,19 @@ public class MainActivity extends Activity {
         if(!ddStr.matches("^\\d{8}$")){
             ddOK = false;
             ddErr.append("- Must be 8 digits\n");
-        } else {
+        }else{
             dd = strictDate(ddStr);
+
             if(dd == null){
                 ddOK = false;
                 ddErr.append("- Invalid date\n");
-            } else if(!dd.after(today)){
+            }else if(!dd.after(today)){
                 ddOK = false;
                 ddErr.append("- Must be future\n");
             }
         }
 
-        if(pd != null && dd != null && !pd.before(dd)){
+        if(pd!=null && dd!=null && !pd.before(dd)){
             ddOK = false;
             ddErr.append("- PD must < DD\n");
         }
@@ -183,13 +213,13 @@ public class MainActivity extends Activity {
 
         setStatus(allOK);
 
-        addBlock("ID",id,"1","Must 0",idOK,idErr);
+        addBlock("ID",id,"1","Must 0",idOK,"");
         addDivider();
 
-        addBlock("SKU",sku,String.valueOf(sku.length()),"9 digits",skuOK,skuErr);
+        addBlock("SKU",sku,String.valueOf(sku.length()),"9 digits",skuOK,"");
         addDivider();
 
-        addBlock("Batch",batch,String.valueOf(batch.length()),"<=15",batchOK,batchErr);
+        addBlock("Batch",batch,String.valueOf(batch.length()),"<=15",batchOK,"");
         addDivider();
 
         addBlock("Production Date",pdStr,String.valueOf(pdStr.length()),
@@ -208,7 +238,7 @@ public class MainActivity extends Activity {
             tvStatus.setText("PASS");
             parent.setBackgroundColor(Color.GREEN);
             t.startTone(ToneGenerator.TONE_PROP_BEEP);
-        } else {
+        }else{
             tvStatus.setText("FAIL");
             parent.setBackgroundColor(Color.RED);
             t.startTone(ToneGenerator.TONE_SUP_ERROR);
@@ -217,8 +247,7 @@ public class MainActivity extends Activity {
 
     private void addBlock(String name,String value,String len,String rule,boolean pass,String err){
         TextView tv=new TextView(this);
-        tv.setText("["+name+"]\nValue:"+value+"\nLen:"+len+"\nRule:"+rule+
-                "\n"+(pass?"PASS":"FAIL")+"\n"+err);
+        tv.setText("["+name+"]\nValue:"+value+"\nLen:"+len+"\nRule:"+rule+"\n"+(pass?"PASS":"FAIL")+"\n"+err);
         tv.setPadding(20,20,20,20);
         tv.setBackgroundColor(pass?Color.parseColor("#C8E6C9"):Color.parseColor("#FFCDD2"));
         container.addView(tv);
