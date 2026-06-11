@@ -244,7 +244,6 @@ public class MainActivity extends Activity {
 
         addBlock("DD",ddStr,String.valueOf(ddStr.length()),"> Today AND PD<DD",ddOK,ddErr.toString());
 
-        etInput.setText("");
     }
 
     private void setStatus(boolean pass){
