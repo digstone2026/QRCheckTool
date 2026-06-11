@@ -76,7 +76,7 @@ public class MainActivity extends Activity {
         tvStatus.setTextColor(Color.WHITE);
 
         tvInfo = new TextView(this);
-        tvInfo.setText("v1.0 | P:0 F:0");
+        tvInfo.setText("v1.1|20260612|jazhao");
         tvInfo.setGravity(Gravity.CENTER);
         tvInfo.setTextColor(Color.WHITE);
 
