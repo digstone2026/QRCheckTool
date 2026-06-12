@@ -276,7 +276,7 @@ public class MainActivity extends Activity {
         "结果：" + (pass ? "PASS" : "FAIL") +
         (err == null || err.isEmpty() ? "" : "\n错误：" + err)
                     );
-        tv.setPadding(20,20,20,20);
+        tv.setPadding(20,6,20,6);
         tv.setBackgroundColor(pass?Color.parseColor("#C8E6C9"):Color.parseColor("#FFCDD2"));
         container.addView(tv);
     }
